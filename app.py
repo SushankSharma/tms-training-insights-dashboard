@@ -5,14 +5,15 @@ from io import BytesIO
 import plotly.express as px
 from st_aggrid import AgGrid, GridOptionsBuilder
 
-# Set page configuration 
+# Set page configuration
 st.set_page_config(layout="wide", page_title="TMS Trng Insights Dashboard")
+
 
 # Function to process multiple JSON files
 @st.cache_data
 def process_json():
     files = [
-        "O_CT_DEC_response.JSON", "AUG_OCT_response.JSON",
+        "OCT_DEC_response.JSON", "AUG_OCT_response.JSON",
         "JULY_AUG_response.JSON", "S_JAN25_response.JSON",
         "S_FEB25_response.JSON"
     ]
@@ -25,42 +26,97 @@ def process_json():
                 for session in data["responseData"]:
                     for ses in session["sessions"]:
                         sessions.append({
-                            "sessionId": ses["sessionId"],
-                            "date": pd.to_datetime(ses["date"], format="%d/%m/%Y", errors="coerce"),
-                            "trainingCourseCode [Curriculum]": ses["trainingCourseCode"],
-                            "componentName [Lesson]": ses["componentName"],
-                            "startTime": ses["start Time"],
-                            "endTime": ses["endTime"]
+                            "sessionId":
+                            ses["sessionId"],
+                            "date":
+                            pd.to_datetime(ses["date"],
+                                           format="%d/%m/%Y",
+                                           errors="coerce"),
+                            "trainingCourseCode [Curriculum]":
+                            ses["trainingCourseCode"],
+                            "componentName [Lesson]":
+                            ses["componentName"],
+                            "startTime":
+                            ses["startTime"],
+                            "endTime":
+                            ses["endTime"]
                         })
                         for instr in ses["instructors"]:
                             instructors.append({
-                                "sessionId": ses["sessionId"],
-                                "instructor": f"{instr['name']} ({instr['staffNumber']})",
-                                "email_instructor": instr.get("email", "N/A"),
-                                "dutyCode_instructor": instr["dutyCode"]
+                                "sessionId":
+                                ses["sessionId"],
+                                "instructor":
+                                f"{instr['name']} ({instr['staffNumber']})",
+                                "email_instructor":
+                                instr.get("email", "N/A"),
+                                "dutyCode_instructor":
+                                instr["dutyCode"]
                             })
-                        for trainee in ses["trainees"]:
+                        for trainee in ses["trainee"]:
                             trainees.append({
-                                "sessionId": ses["sessionId"],
-                                "trainee": f"{trainee['name']} ({trainee['staffNumber']})",
-                                "email_trainee": trainee.get("email", "N/A"),
-                                "dutyCode_trainee": trainee["dutyCode"]
+                                "sessionId":
+                                ses["sessionId"],
+                                "trainee":
+                                f"{trainee['name']} ({trainee['staffNumber']})",
+                                "email_trainee":
+                                trainee.get("email", "N/A"),
+                                "dutyCode_trainee":
+                                trainee["dutyCode"]
                             })
         except FileNotFoundError:
             st.error(f"File {file} not found.")
             return pd.DataFrame(), pd.DataFrame(), pd.DataFrame()
 
-    return pd.DataFrame(sessions), pd.DataFrame(instructors), pd.DataFrame(trainees)
+    return pd.DataFrame(sessions), pd.DataFrame(instructors), pd.DataFrame(
+        trainees)
+
 
 # Process JSON data
 sessions_df, instructors_df, trainees_df = process_json()
 
 # Merge DataFrames
-merged_df = sessions_df.merge(instructors_df, on="sessionId", how="left").merge(trainees_df, on="sessionId", how="left")
+merged_df = sessions_df.merge(instructors_df, on="sessionId",
+                              how="left").merge(trainees_df,
+                                                on="sessionId",
+                                                how="left")
 merged_df = merged_df.sort_values(by="date", ascending=False)
 
 # Top-Level KPIs
-st.markdown("GRD/SIM Training Insight DB / Jul 2024-Feb 2025", unsafe_allow_html=True)
+st.markdown(
+    "<h1 style='text-align: center;'>GRD/SIM Training Insight DB / Jul 2024-Feb 2025</h1>",
+    unsafe_allow_html=True)
+
+# CSS for enhanced styling
+st.markdown("""
+    <style>
+        .flex-container {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        .filter-item {
+            flex: 1;
+            min-width: 200px;
+        }
+        .kpi-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .kpi-header {
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+    """,
+            unsafe_allow_html=True)
 
 # Calculate KPI Metrics
 total_curriculums = sessions_df["trainingCourseCode [Curriculum]"].nunique()
@@ -75,105 +131,163 @@ top_trainee_sessions = trainees_df["trainee"].value_counts().max()
 # Display KPIs
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.metric("Total Curriculums", total_curriculums)
-    st.metric("Top Trainer", top_trainer)
+    st.markdown(
+        f"<div class='kpi-box'><div class='kpi-header'>Total Curriculums</div>{total_curriculums}</div>",
+        unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='kpi-box'><div class='kpi-header'>Top Trainer</div>{top_trainer}</div>",
+        unsafe_allow_html=True)
 with col2:
-    st.metric("Total Lessons", total_lessons)
-    st.metric("Top Trainer Sessions", top_trainer_sessions)
+    st.markdown(
+        f"<div class='kpi-box'><div class='kpi-header'>Total Lessons</div>{total_lessons}</div>",
+        unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='kpi-box'><div class='kpi-header'>Top Trainer Sessions</div>{top_trainer_sessions}</div>",
+        unsafe_allow_html=True)
 with col3:
-    st.metric("Total Trainers", total_trainers)
-    st.metric("Top Trainee", top_trainee)
+    st.markdown(
+        f"<div class='kpi-box'><div class='kpi-header'>Total Trainers</div>{total_trainers}</div>",
+        unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='kpi-box'><div class='kpi-header'>Top Trainee</div>{top_trainee}</div>",
+        unsafe_allow_html=True)
 with col4:
-    st.metric("Total Trainees", total_trainees)
-    st.metric("Top Trainee Sessions", top_trainee_sessions)
+    st.markdown(
+        f"<div class='kpi-box'><div class='kpi-header'>Total Trainees</div>{total_trainees}</div>",
+        unsafe_allow_html=True)
+    st.markdown(
+        f"<div class='kpi-box'><div class='kpi-header'>Top Trainee Sessions</div>{top_trainee_sessions}</div>",
+        unsafe_allow_html=True)
 
 # Filtered by Trainee Duty Codes
 st.header("Filtered by Trainee Duty Codes")
 selected_duty_codes = st.multiselect(
     "Select Trainee Duty Codes",
     merged_df["dutyCode_trainee"].dropna().unique(),
-    help="Filter results based on trainee duty codes."
-)
+    help="Filter results based on trainee duty codes.")
 
-# Additional Filters
-curriculum_filter = st.multiselect(
-    "Select Curriculum",
-    merged_df["trainingCourseCode [Curriculum]"].dropna().unique(),
-    help="Filter results based on curriculum."
-)
-
-lesson_filter = st.multiselect(
-    "Select Lesson",
-    merged_df["componentName [Lesson]"].dropna().unique(),
-    help="Filter results based on lesson."
-)
-
-instructor_filter = st.multiselect(
-    "Select Instructor",
-    merged_df["instructor"].dropna().unique(),
-    help="Filter results based on instructor."
-)
-
-trainee_filter = st.multiselect(
-    "Select Trainee",
-    merged_df["trainee"].dropna().unique(),
-    help="Filter results based on trainee."
-)
-
-start_date = st.date_input("Start Date", value=merged_df["date"].min())
-end_date = st.date_input("End Date", value=merged_df["date"].max())
-search_text = st.text_input("Search", placeholder="Search across all columns...")
-
-# Apply filters
-filtered_df = merged_df.copy()
 if selected_duty_codes:
-    filtered_df = filtered_df[filtered_df["dutyCode_trainee"].isin(selected_duty_codes)]
-if curriculum_filter:
-    filtered_df = filtered_df[filtered_df["trainingCourseCode [Curriculum]"].isin(curriculum_filter)]
-if lesson_filter:
-    filtered_df = filtered_df[filtered_df["componentName [Lesson]"].isin(lesson_filter)]
-if instructor_filter:
-    filtered_df = filtered_df[filtered_df["instructor"].isin(instructor_filter)]
-if trainee_filter:
-    filtered_df = filtered_df[filtered_df["trainee"].isin(trainee_filter)]
-filtered_df = filtered_df[(filtered_df["date"] >= pd.Timestamp(start_date)) & (filtered_df["date"] <= pd.Timestamp(end_date))]
+    duty_filtered_df = merged_df[merged_df["dutyCode_trainee"].isin(
+        selected_duty_codes)]
 
-# Search functionality
-if search_text:
-    filtered_df = filtered_df[filtered_df.astype(str).apply(lambda row: row.str.contains(search_text, case=False)).any(axis=1)]
+    st.markdown("<div class='flex-container'>", unsafe_allow_html=True)
+    start_date = st.date_input("Start Date",
+                               value=duty_filtered_df["date"].min())
+    end_date = st.date_input("End Date", value=duty_filtered_df["date"].max())
+    search_text = st.text_input("Search",
+                                placeholder="Search across all columns...")
+    st.markdown("</div>", unsafe_allow_html=True)
 
-# Display filtered DataFrame
-st.subheader("Filtered Data")
-gb = GridOptionsBuilder.from_dataframe(filtered_df)
-gb.configure_pagination(paginationAutoPageSize=True)  # Add pagination
-gb.configure_side_bar()  # Add a sidebar
-gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc="sum", editable=True)
-gridOptions = gb.build()
-AgGrid(filtered_df, gridOptions=gridOptions, enable_enterprise_modules=True, height=300, fit_columns_on_grid_load=True)
+    # Apply filters
+    duty_filtered_df = duty_filtered_df[
+        (duty_filtered_df["date"] >= pd.Timestamp(start_date))
+        & (duty_filtered_df["date"] <= pd.Timestamp(end_date))]
+    if search_text:
+        duty_filtered_df = duty_filtered_df[duty_filtered_df.apply(
+            lambda row: row.astype(str).str.contains(search_text, case=False
+                                                     ).any(),
+            axis=1)]
 
-# Visualizations
-st.subheader("Visualizations")
-fig = px.bar(filtered_df, x="trainingCourseCode [Curriculum]", y="sessionId", color="instructor", title="Sessions by Curriculum and Instructor")
-st.plotly_chart(fig)
+    st.subheader("Filtered Results by Duty Codes")
+    display_columns = [
+        col for col in duty_filtered_df.columns if col != "sessionId"
+    ]
+    gb = GridOptionsBuilder.from_dataframe(duty_filtered_df[display_columns])
+    gb.configure_default_column(sortable=True, filterable=True, resizable=True)
+    AgGrid(duty_filtered_df[display_columns],
+           gridOptions=gb.build(),
+           height=300,
+           theme="streamlit")
 
-fig = px.pie(filtered_df, names="dutyCode_trainee", title="Trainee Duty Codes Distribution")
-st.plotly_chart(fig)
+    st.subheader("Lesson Distribution by Duty Codes")
+    insights_chart = duty_filtered_df.groupby(
+        ["trainingCourseCode [Curriculum]",
+         "componentName [Lesson]"]).size().reset_index(name="Count")
+    fig = px.bar(insights_chart,
+                 x="trainingCourseCode [Curriculum]",
+                 y="Count",
+                 color="componentName [Lesson]",
+                 title="Lesson Distribution")
+    st.plotly_chart(fig, use_container_width=True)
 
-# Export Options
-st.subheader("Export Data")
-csv = filtered_df.to_csv(index=False).encode('utf-8')
-st.download_button(
-    label="Download CSV",
-    data=csv,
-    file_name='filtered_data.csv',
-    mime='text/csv'
-)
+# Curriculum and Lesson Insights
+st.header("Curriculum and Lesson Insights")
+selected_courses = st.multiselect(
+    "Select Curriculums (Training Course Codes)",
+    merged_df["trainingCourseCode [Curriculum]"].dropna().unique(),
+    help="Choose a curriculum to view its lessons.")
 
-excel = BytesIO()
-filtered_df.to_excel(excel, index=False)
-st.download_button(
-    label="Download Excel",
-    data=excel.getvalue(),
-    file_name='filtered_data.xlsx',
-    mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-)
+if selected_courses:
+    filtered_df = merged_df[merged_df["trainingCourseCode [Curriculum]"].isin(
+        selected_courses)]
+    lessons = filtered_df["componentName [Lesson]"].dropna().unique().tolist()
+    select_all = st.checkbox("Select All Lessons", value=False)
+    selected_components = lessons if select_all else st.multiselect(
+        "Select Lessons (Component Names)", lessons)
+
+    if selected_components:
+        final_filtered_df = filtered_df[
+            filtered_df["componentName [Lesson]"].isin(selected_components)]
+
+        st.markdown("<div class='flex-container'>", unsafe_allow_html=True)
+        start_date = st.date_input("Start Date",
+                                   value=final_filtered_df["date"].min(),
+                                   key="lesson_start_date")
+        end_date = st.date_input("End Date",
+                                 value=final_filtered_df["date"].max(),
+                                 key="lesson_end_date")
+        search_text = st.text_input("Search",
+                                    placeholder="Search across all columns...",
+                                    key="lesson_search_text")
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        # Apply filters
+        final_filtered_df = final_filtered_df[
+            (final_filtered_df["date"] >= pd.Timestamp(start_date))
+            & (final_filtered_df["date"] <= pd.Timestamp(end_date))]
+        if search_text:
+            final_filtered_df = final_filtered_df[final_filtered_df.apply(
+                lambda row: row.astype(str).str.contains(search_text,
+                                                         case=False).any(),
+                axis=1)]
+
+        st.subheader("Filtered Results by Curriculum and Lesson")
+        display_columns = [
+            col for col in final_filtered_df.columns if col != "sessionId"
+        ]
+        gb = GridOptionsBuilder.from_dataframe(
+            final_filtered_df[display_columns])
+        gb.configure_default_column(sortable=True,
+                                    filterable=True,
+                                    resizable=True)
+        AgGrid(final_filtered_df[display_columns],
+               gridOptions=gb.build(),
+               height=300,
+               theme="streamlit")
+
+        # Visualization
+        st.subheader("Lesson Distribution by Curriculum Names")
+        distribution_chart = final_filtered_df.groupby(
+            ["trainingCourseCode [Curriculum]",
+             "componentName [Lesson]"]).size().reset_index(name="Count")
+        distribution_fig = px.treemap(
+            distribution_chart,
+            path=["trainingCourseCode [Curriculum]", "componentName [Lesson]"],
+            values="Count",
+            title="Lesson Distribution by Curriculum")
+        st.plotly_chart(distribution_fig, use_container_width=True)
+
+        # Download filtered data
+        st.subheader("Download Filtered Data")
+        buffer = BytesIO()
+        with pd.ExcelWriter(buffer, engine="xlsxwriter") as writer:
+            final_filtered_df.to_excel(writer,
+                                       index=False,
+                                       sheet_name="Filtered Data")
+        st.download_button(
+            label="Download Filtered Results",
+            data=buffer.getvalue(),
+            file_name="filtered_results.xlsx",
+            mime=
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
