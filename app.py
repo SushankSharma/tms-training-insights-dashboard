@@ -15,7 +15,7 @@ def process_json():
     files = [
         "OCT_DEC_response.JSON", "AUG_OCT_response.JSON",
         "JULY_AUG_response.JSON", "S_JAN25_response.JSON",
-        "S_FEB25_response.JSON", "S_MAR25_response.JSON"
+        "S_FEB25_response.JSON", "S_MAR25_response.JSON", "S_APR25_response.JSON"
     ]
     sessions, instructors, trainees = [], [], []
 
