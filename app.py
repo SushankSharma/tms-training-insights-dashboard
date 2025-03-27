@@ -83,7 +83,7 @@ merged_df = merged_df.sort_values(by="date", ascending=False)
 
 # Top-Level KPIs
 st.markdown(
-    "<h1 style='text-align: center;'>GRD/SIM Training Insight DB / Jul 2024-Mar 2025</h1>",
+    "<h1 style='text-align: center;'>GRD/SIM Training Insight DB / Jul 2024 - Apr 2025</h1>",
     unsafe_allow_html=True)
 
 # CSS for enhanced styling
