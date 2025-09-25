@@ -13,13 +13,14 @@ st.set_page_config(layout="wide", page_title="TMS Trng Insights Dashboard")
 @st.cache_data
 def process_json():
     files = [
-        "S_01-15_DEC24_response.JSON", "S_15-31_DEC24_response.JSON",
+        "S_01-15_DEC24_response.JSON", "S_15-31_DEC24_response.JSON", 
         "S_01-15_JAN25_response.JSON", "S_15-31_JAN25_response.JSON",
         "S_01-15_FEB25_response.JSON", "S_15-28_FEB25_response.JSON",
         "S_01-15_MAR25_response.JSON", "S_15-31_MAR25_response.JSON",
         "S_01-15_APR25_response.JSON", "S_15-30_APR25_response.JSON",
         "S_01-31_MAY25_response.JSON", "S_01-30_JUN25_response.JSON",
-        "S_28MAY25_31JUL25_response.JSON", "S_01AUG25_30AUG25_response.JSON"
+        "S_28MAY25_31JUL25_response.JSON", "S_01AUG25_30AUG25_response.JSON",
+        "S_01SEPT25_30SEPT25_response.JSON"
     ]
     sessions, instructors, trainees = [], [], []
 
