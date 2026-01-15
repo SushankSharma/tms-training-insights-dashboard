@@ -21,7 +21,8 @@ def process_json():
         "S_01-31_MAY25_response.JSON", "S_01-30_JUN25_response.JSON",
         "S_28MAY25_31JUL25_response.JSON", "S_01AUG25_30AUG25_response.JSON",
         "S_01SEPT25_30SEPT25_response.JSON", "S_01OCT25_31OCT25_response.JSON",
-        "S_01NOV25_30NOV25_response.JSON", "S_01DEC25_31DEC25_response.JSON"
+        "S_01NOV25_30NOV25_response.JSON", "S_01DEC25_31DEC25_response.JSON",
+        "S_01JAN26_31JAN26_response.JSON"
     ]
     sessions, instructors, trainees = [], [], []
 
@@ -89,7 +90,7 @@ merged_df = merged_df.sort_values(by="date", ascending=False)
 
 # Top-Level KPIs
 st.markdown(
-    "<h1 style='text-align: center;'>GRD/SIM Training Insight DB / Dec 2024 - Dec 2025</h1>",
+    "<h1 style='text-align: center;'>GRD/SIM Training Insight DB / Dec 2024 - Jan 2026</h1>",
     unsafe_allow_html=True)
 
 # CSS for enhanced styling
